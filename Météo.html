@@ -1,15 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Météo</title>
 </head>
+
 <body>
-    <input type="text" id="Météo">
-    
-<h1> bonjours mes amis branche html</h1>
 
+<header>
+    <h1>GlobalWeather</h1>
+</header>
 
+<main>
+
+    <!-- ici c'est le formulaire a remplir pour les villes et la localisation-->
+    <form id="formulaire">
+
+        <label for="input">Ville :</label>
+        <input type="text" id="input"
+        placeholder="Entrez le nom d'une ville..." required>
+
+        <button type="submit" id="search">Recherche</button>
+        <button type="button" id="btnGeo">Localisation</button>
+
+        <p id="erreur"></p>
+
+    </form>
+
+    <!-- ici c'est la carte meteo -->
+    <section id="dashboard">
+        <p id="messagevide">
+            <strong>Veuillez saisir le nom d'une ville</strong>
+        </p>
+    </section>
+
+</main>
+
+<script src="script.js"></script>
+    <!--bon les gars soyez chaud là bas-->
 </body>
 </html>
