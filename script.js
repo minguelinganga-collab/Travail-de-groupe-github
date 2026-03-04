@@ -1,9 +1,9 @@
 const apiKey = "0e628e594ef3218e171f4032b602fda7"
-const form = document.getElementsById("formulaire");
-const input = document.getElementsById("input");
-const dashboard = document.getElementsById("dashboard");
-const erreur = document.getElementsById("erreur");
-const btnGeo = document.getElementsById("btnGeo");
+const form = document.getElementById("formulaire");
+const input = document.getElementById("input");
+const dashboard = document.getElementById("dashboard");
+const erreur = document.getElementById("erreur");
+const btnGeo = document.getElementById("btnGeo");
 
 form.addEventListener("submit", function(e) {
     e.preventDefault();
