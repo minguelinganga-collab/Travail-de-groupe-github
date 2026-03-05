@@ -1,63 +1,99 @@
-const apiKey = "0e628e594ef3218e171f4032b602fda7"
 const form = document.getElementById("formulaire");
 const input = document.getElementById("input");
 const dashboard = document.getElementById("dashboard");
 const erreur = document.getElementById("erreur");
 const btnGeo = document.getElementById("btnGeo");
 
-form.addEventListener("submit", function(e) {
+const apiKey = "0e628e594ef3218e171f4032b602fda7";
+
+// ===== RECHERCHE PAR VILLE =====
+form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
-    const ville = input.value.trim();
-
-    if (ville === "") {
-        erreur.textContent = "Veuillez entrer une ville.";
-        return;
-          }
-
-    getWeatherByCity(ville);
+    obtenirPrevisionsParVille(input.value.trim());
 });
-btnGeo.addEventListener("click", function() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
+
+// ===== LOCALISATION GPS =====
+btnGeo.addEventListener("click", () => {
+
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(async (position) => {
+
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-            getWeatherByCoords(lat, lon);
-        }, () => {
-            erreur.textContent = "Localisation refusée.";
-        });
-    }
-});
-function getWeatherByCity(city) {
-    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=fr`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.cod !== 200) {
-                erreur.textContent = "Ville introuvable.";
-                return;
-            }
 
-            afficherMeteo(data);
-        })
-        .catch(() => {
-            erreur.textContent = "Erreur de connexion.";
+            obtenirPrevisionsParCoordonnees(lat, lon);
+
+        }, () => {
+            erreur.textContent = "Impossible d'obtenir la localisation";
         });
+    } else {
+        erreur.textContent = "Géolocalisation non supportée";
+    }
+
+});
+
+// ===== PREVISION PAR VILLE =====
+async function obtenirPrevisionsParVille(ville){
+
+    if(ville === ""){
+        erreur.textContent = "Entrez une ville";
+        return;
+    }
+
+    try{
+        const response = await fetch(
+            `https://api.openweathermap.org/data/2.5/forecast?q=${ville}&appid=${apiKey}&units=metric&lang=fr`
+        );
+
+        if(!response.ok){
+            throw new Error("Ville introuvable");
+        }
+
+        const data = await response.json();
+        afficherPrevisions(data);
+
+    }catch(err){
+        erreur.textContent = err.message;
+    }
 }
-function getWeatherByCoords(lat, lon) {
-    fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=fr`)
-        .then(response => response.json())
-        .then(data => {
-            afficherMeteo(data);
-        });
+
+// ===== PREVISION PAR COORDONNEES GPS =====
+async function obtenirPrevisionsParCoordonnees(lat, lon){
+
+    try{
+        const response = await fetch(
+            `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=fr`
+        );
+
+        const data = await response.json();
+        afficherPrevisions(data);
+
+    }catch(err){
+        erreur.textContent = "Erreur météo";
+    }
 }
-function afficherMeteo(data) {
-    erreur.textContent = "";
+
+// ===== AFFICHAGE PREVISIONS =====
+function afficherPrevisions(data){
 
     dashboard.innerHTML = `
-    <h2>${data.name}</h2>
-    <p>Température : ${data.main.temp} °C</p>
-    <p>Météo : ${data.weather[0].description}</p>
-    <p>Vent : ${data.wind.speed} m/s</p>
-    <p>Humidité : ${data.main.humidity}%</p>
-     `;
+        <h2>${data.city.name}, ${data.city.country}</h2>
+        <h3>Prévisions 5 jours</h3>
+    `;
+
+    const jours = data.list.filter((item, index) => index % 8 === 0).slice(0,5);
+
+    jours.forEach(jour => {
+
+        const date = new Date(jour.dt * 1000);
+
+        dashboard.innerHTML += `
+            <div class="meteo-card">
+                <h3>${date.toLocaleDateString("fr-FR")}</h3>
+                <p>🌡️ Temp : ${jour.main.temp} °C</p>
+                <p>💧 Humidité : ${jour.main.humidity} %</p>
+                <p>☁️ ${jour.weather[0].description}</p>
+            </div>
+        `;
+    });
 }
